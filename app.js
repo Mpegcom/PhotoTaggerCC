@@ -322,7 +322,10 @@ class PhotoTagger {
                 if (entry.isIntersecting) {
                     const img = entry.target;
                     const photoName = img.dataset.photoName;
-                    if (photoName && !img.src) {
+                    // Use data-pending attribute instead of checking img.src
+                    // (setting img.src = '' results in base URL, not empty string)
+                    if (photoName && img.dataset.pending === 'true') {
+                        img.dataset.pending = 'false';
                         this.loadThumbnail(img, photoName);
                     }
                 }
@@ -632,7 +635,7 @@ class PhotoTagger {
             if (this.thumbnailCache.has(photo.name)) {
                 thumbnail.src = this.thumbnailCache.get(photo.name);
             } else {
-                thumbnail.src = ''; // Placeholder
+                thumbnail.dataset.pending = 'true';
                 this.intersectionObserver?.observe(thumbnail);
             }
 
