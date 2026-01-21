@@ -460,8 +460,30 @@ class PhotoTagger {
             const item = document.createElement('div');
             item.className = 'recent-folder-item';
             item.textContent = name;
+            item.addEventListener('click', () => this.openRecentFolder(name));
             this.recentFoldersList.appendChild(item);
         });
+    }
+
+    async openRecentFolder(folderName) {
+        try {
+            if (!('showDirectoryPicker' in window)) {
+                this.showToast('Browser does not support folder access. Use Chrome or Edge.', 'error');
+                return;
+            }
+
+            this.showToast(`Select "${folderName}" to open it`, 'info');
+            this.directoryHandle = await window.showDirectoryPicker();
+
+            // Move selected folder to top of recent list
+            this.addToRecentFolders(this.directoryHandle.name);
+            await this.loadPhotos();
+        } catch (err) {
+            if (err.name !== 'AbortError') {
+                console.error('Error opening folder:', err);
+                this.showToast('Error opening folder', 'error');
+            }
+        }
     }
 
     async loadPhotos() {
